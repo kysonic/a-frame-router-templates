@@ -19,14 +19,14 @@ Example:
         <a-sky color="#ECECEC"></a-sky>
     </a-scene>
     
-####Change route 
+#### Change route 
 
     var router = document.getElementById('scene').systems['router'];
     router.changeRoute('frame1');
     
-####Templates
+#### Templates
 
-#####Register one    
+##### Register one    
 
     <a-route-assets>
         <img id="pug" src="../assets/pug.jpg">
@@ -38,11 +38,11 @@ Example:
 
     <a-sky id="sky" src="#pug"></a-sky>
     
-#####Add on scene via component 
+##### Add on scene via component 
 
     <a-entity template="name: frame1"></a-entity>
     
-#####Add on scene via a-route     
+##### Add on scene via a-route     
      
     <a-route id="frame1" template="frame2"></a-route> 
     
