@@ -28,15 +28,17 @@ Example:
 
 ##### Register one    
 
-    <a-route-assets>
-        <img id="pug" src="../assets/pug.jpg">
-        <a-asset-item id="horse-mtl" src="assets/monkey.js"></a-asset-item>
-    </a-route-assets>
+    AFRAME.registerTemplate('frame1', `  
+            <a-route-assets>
+                <img id="pug" src="../assets/pug.jpg">
+                <a-asset-item id="horse-mtl" src="assets/monkey.js"></a-asset-item>
+            </a-route-assets>
     
-    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
-    <a-box position="-1 0.5 -1" rotation="0 45 0" color="#ccaabb"></a-box>
-
-    <a-sky id="sky" src="#pug"></a-sky>
+            <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+            <a-box position="-1 0.5 -1" rotation="0 45 0" color="#ccaavv"></a-box>
+    
+            <a-sky id="sky" src="#pug"></a-sky>
+    `);
     
 ##### Add on scene via component 
 
