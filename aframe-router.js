@@ -59,6 +59,7 @@ AFRAME.registerElement('a-route', {
     prototype: Object.create(window.HTMLElement.prototype, {
         createdCallback: {
             value: function () {
+                this.isRoute = true;
                 this.scene = this.closestScene();
                 this.router = this.scene.getAttribute('router');
             }
@@ -95,8 +96,39 @@ AFRAME.registerElement('a-route', {
 
         attach: {
             value: function () {
+                if (this.children.length) {
+                    this.attachNodes(this.children);
+                }
+                var templateName = this.getAttribute('template');
+
+                if (!templateName) {
+                    return false;
+                }
+
+                if(!AFRAME.templates) {
+                    throw new Error('Include aframe-templates.js');
+                }
+
+                if (!AFRAME.templates[templateName]) {
+                    throw new Error('Cannot find "' + this.data.name + '" template');
+                }
+
+                const template = AFRAME.templates[templateName];
+                var clone = document.importNode(template.content, true);
+                this.attachNodes(clone.children);
+            }
+        },
+
+        attachNodes: {
+            value: function (nodes) {
                 var self = this;
-                [].forEach.call(this.children, function (child) {
+                [].forEach.call(nodes, function (child) {
+                    if (child.tagName.toLowerCase() === 'a-route-assets') {
+                        if (child.isAttached) {
+                            return false;
+                        }
+                        child.attach && child.attach();
+                    }
                     var childClone = child.cloneNode(true);
                     childClone.dataset.routeId = self.id;
                     self.scene.appendChild(childClone);
@@ -114,6 +146,46 @@ AFRAME.registerElement('a-route', {
             }
         },
 
-        emit: {value: function (type, data) {}}
+        emit: {
+            value: function (type, data) {
+            }
+        }
+    })
+});
+
+/**
+ * So how assets should be represented as child of a-scene
+ * we have to handle it separately
+ */
+
+AFRAME.registerElement('a-route-assets', {
+    prototype: Object.create(window.HTMLElement.prototype, {
+        createdCallback: {
+            value: function () {
+                this.isAttached = false;
+            }
+        },
+        attach: {
+            value: function () {
+                var self = this;
+                this.isAttached = true;
+                this.scene = document.querySelector('a-scene');
+                if (!this.scene) {
+                    throw new Error('a-route-assets cannot find a-scene.');
+                }
+                this.assets = this.scene.querySelector('a-assets') || this.createSceneAssets();
+                [].forEach.call(this.children, function (child) {
+                    self.assets.appendChild(child);
+                });
+            }
+        },
+
+        createSceneAssets: {
+            value: function () {
+                var assets = document.createElement('a-assets');
+                this.scene.appendChild(assets);
+                return assets;
+            }
+        }
     })
 });
