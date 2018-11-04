@@ -1,9 +1,8 @@
 <html>
 <head>
     <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
-    <script src="../aframe-router.js"></script>
-    <script src="../aframe-templates.js"></script>
-    <script src="templates.js"></script>
+    <script src="../aframe-router-templates.js"></script>
+    <script src="./templates.js"></script>
     <script>
         window.onload = function () {
             var router = document.getElementById('scene').systems['router'];
@@ -12,7 +11,6 @@
                 router.changeRoute(routeId);
             }
         }
-
     </script>
 </head>
 <body>
@@ -22,6 +20,8 @@
     <a-route id="frame2" template="frame1"></a-route>
 
     <a-route id="frame3" template="frame3"></a-route>
+
+    <a-template id="common"></a-template>
 
     <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
 

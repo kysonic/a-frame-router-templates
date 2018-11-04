@@ -1,5 +1,21 @@
 /* global AFRAME */
 
+AFRAME.templates = {};
+
+AFRAME.registerTemplate = function(name, HTML) {
+    if(!name) {
+        throw new Error('Name of template cannot be empty');
+    }
+    if(AFRAME.templates[name]) {
+        throw new Error('Template "'+ name +'" already registered');
+    }
+
+    var template = document.createElement('template');
+    template.innerHTML = HTML;
+
+    AFRAME.templates[name] = template;
+};
+
 
 AFRAME.registerSystem('router', {
     schema: {
@@ -55,8 +71,40 @@ AFRAME.registerSystem('router', {
     }
 });
 
+var commonPrototype = {
+    closestScene: {
+        value: function closest() {
+            var element = this;
+            while (element) {
+                if (element.isScene) {
+                    break;
+                }
+                element = element.parentElement;
+            }
+            return element;
+        }
+    },
+
+    attachNodes: {
+        value: function (nodes) {
+            var self = this;
+            [].forEach.call(nodes, function (child) {
+                if (child.tagName.toLowerCase() === 'a-sub-assets') {
+                    if (child.isAttached) {
+                        return false;
+                    }
+                    return child.attach && child.attach();
+                }
+                var childClone = child.cloneNode(true);
+                childClone.dataset.routeId = self.id;
+                self.scene.appendChild(childClone);
+            });
+        }
+    }
+}
+
 AFRAME.registerElement('a-route', {
-    prototype: Object.create(window.HTMLElement.prototype, {
+    prototype: Object.create(window.HTMLElement.prototype, Object.assign({
         createdCallback: {
             value: function () {
                 this.isRoute = true;
@@ -78,19 +126,6 @@ AFRAME.registerElement('a-route', {
                 if (this.id === this.router.current) {
                     this.detach();
                 }
-            }
-        },
-
-        closestScene: {
-            value: function closest() {
-                var element = this;
-                while (element) {
-                    if (element.isScene) {
-                        break;
-                    }
-                    element = element.parentElement;
-                }
-                return element;
             }
         },
 
@@ -119,23 +154,6 @@ AFRAME.registerElement('a-route', {
             }
         },
 
-        attachNodes: {
-            value: function (nodes) {
-                var self = this;
-                [].forEach.call(nodes, function (child) {
-                    if (child.tagName.toLowerCase() === 'a-route-assets') {
-                        if (child.isAttached) {
-                            return false;
-                        }
-                        child.attach && child.attach();
-                    }
-                    var childClone = child.cloneNode(true);
-                    childClone.dataset.routeId = self.id;
-                    self.scene.appendChild(childClone);
-                });
-            }
-        },
-
         detach: {
             value: function () {
                 var self = this;
@@ -144,13 +162,8 @@ AFRAME.registerElement('a-route', {
                     self.scene.removeChild(node);
                 });
             }
-        },
-
-        emit: {
-            value: function (type, data) {
-            }
         }
-    })
+    }, commonPrototype))
 });
 
 /**
@@ -158,7 +171,7 @@ AFRAME.registerElement('a-route', {
  * we have to handle it separately
  */
 
-AFRAME.registerElement('a-route-assets', {
+AFRAME.registerElement('a-sub-assets', {
     prototype: Object.create(window.HTMLElement.prototype, {
         createdCallback: {
             value: function () {
@@ -175,7 +188,8 @@ AFRAME.registerElement('a-route-assets', {
                 }
                 this.assets = this.scene.querySelector('a-assets') || this.createSceneAssets();
                 [].forEach.call(this.children, function (child) {
-                    self.assets.appendChild(child);
+                    var childClone = child.cloneNode(true);
+                    self.assets.appendChild(childClone);
                 });
             }
         },
@@ -189,3 +203,37 @@ AFRAME.registerElement('a-route-assets', {
         }
     })
 });
+
+AFRAME.registerElement('a-template', Object.assign({
+    prototype: Object.create(window.HTMLElement.prototype, Object.assign({
+        createdCallback: {
+            value: function () {
+                this.scene = this.closestScene();
+            }
+        },
+
+        attachedCallback: {
+            value: function () {
+                this.attach();
+            }
+        },
+
+        attach: {
+            value: function () {
+                var templateName = this.id;
+
+                if (!templateName) {
+                    return false;
+                }
+
+                if (!AFRAME.templates[templateName]) {
+                    throw new Error('Cannot find "' + templateName + '" template');
+                }
+
+                const template = AFRAME.templates[templateName];
+                var clone = document.importNode(template.content, true);
+                this.attachNodes(clone.children);
+            }
+        }
+    }, commonPrototype))
+}));

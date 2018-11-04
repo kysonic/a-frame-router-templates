@@ -1,4 +1,4 @@
-# A-FRAME ROUTER
+# A-FRAME ROUTER AND TEMPLATES
 
 Example:  
 
@@ -29,10 +29,10 @@ Example:
 ##### Register one    
 
     AFRAME.registerTemplate('frame1', `  
-            <a-route-assets>
+            <a-sub-assets>
                 <img id="pug" src="../assets/pug.jpg">
                 <a-asset-item id="horse-mtl" src="assets/monkey.js"></a-asset-item>
-            </a-route-assets>
+            </a-sub-assets>
     
             <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
             <a-box position="-1 0.5 -1" rotation="0 45 0" color="#ccaavv"></a-box>
@@ -42,12 +42,20 @@ Example:
     
 ##### Add on scene via component 
 
-    <a-entity template="name: frame1"></a-entity>
+    <a-template id="common"></a-template>
     
 ##### Add on scene via a-route     
      
     <a-route id="frame1" template="frame2"></a-route> 
     
-Note: When you add template via a-route all assets will be loaded dynamically.
+Note: All assets added via template will be loaded dinamically.
+ 
+Note2: Construction like: 
+
+    <a-route id="frame1">
+        <a-template id="frame1"></a-template>
+    </a-route> 
     
+not going to work properly, because there is no guarantee that a-template 
+will be attached after a-route. So, use template attribute of a-route instead.    
     
