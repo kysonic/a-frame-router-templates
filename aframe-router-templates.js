@@ -2,6 +2,30 @@
 
 AFRAME.templates = {};
 
+function ATemplate(template) {
+    this.template = template;
+}
+
+ATemplate.prototype.generateId = function() {
+    return '_' + Math.random().toString(36).substr(2, 9);
+};
+/**
+ * Initialize directly via JS
+ * @param id - id of new element added on Scene
+ * @returns {Node}
+ */
+ATemplate.prototype.init = function(id) {
+    var clone = document.importNode(this.template.content, true);
+    this.scene = document.querySelector('a-scene');
+    if(!this.scene) {
+        throw new Error('Scene is not found');
+    }
+    clone.id = id || this.generateId();
+    this.scene.appendChild(clone);
+
+    return clone;
+};
+
 AFRAME.registerTemplate = function(name, HTML) {
     if(!name) {
         throw new Error('Name of template cannot be empty');
@@ -13,9 +37,8 @@ AFRAME.registerTemplate = function(name, HTML) {
     var template = document.createElement('template');
     template.innerHTML = HTML;
 
-    AFRAME.templates[name] = template;
+    AFRAME.templates[name] = new ATemplate(template);
 };
-
 
 AFRAME.registerSystem('router', {
     schema: {
@@ -86,17 +109,30 @@ var commonPrototype = {
     },
 
     attachNodes: {
-        value: function (nodes) {
+        value: function (nodes, idName) {
             var self = this;
-            [].forEach.call(nodes, function (child) {
+            // Attach template nodes
+            nodes.forEach(function (child) {
+                if (child.tagName.toLowerCase() === 'a-template') {
+                    if (child.isAttached) {
+                        return false;
+                    }
+                    const templateNodes = child.getNodes();
+                    nodes = nodes.concat(templateNodes);
+                }
+            });
+            nodes.forEach(function (child) {
                 if (child.tagName.toLowerCase() === 'a-sub-assets') {
                     if (child.isAttached) {
                         return false;
                     }
                     return child.attach && child.attach();
                 }
+                if (child.tagName.toLowerCase() === 'a-template') {
+                    return false;
+                }
                 var childClone = child.cloneNode(true);
-                childClone.dataset.routeId = self.id;
+                childClone.dataset[idName] = self.id;
                 self.scene.appendChild(childClone);
             });
         }
@@ -132,7 +168,7 @@ AFRAME.registerElement('a-route', {
         attach: {
             value: function () {
                 if (this.children.length) {
-                    this.attachNodes(this.children);
+                    this.attachNodes(this.children, 'routeId');
                 }
                 var templateName = this.getAttribute('template');
 
@@ -148,9 +184,9 @@ AFRAME.registerElement('a-route', {
                     throw new Error('Cannot find "' + this.data.name + '" template');
                 }
 
-                const template = AFRAME.templates[templateName];
-                var clone = document.importNode(template.content, true);
-                this.attachNodes(clone.children);
+                this.aTemplate = AFRAME.templates[templateName];
+                var clone = document.importNode(this.aTemplate.template.content, true);
+                this.attachNodes([].slice.call(clone.children), 'routeId');
             }
         },
 
@@ -208,6 +244,7 @@ AFRAME.registerElement('a-template', Object.assign({
     prototype: Object.create(window.HTMLElement.prototype, Object.assign({
         createdCallback: {
             value: function () {
+                this.isAttached = false;
                 this.scene = this.closestScene();
             }
         },
@@ -230,9 +267,32 @@ AFRAME.registerElement('a-template', Object.assign({
                     throw new Error('Cannot find "' + templateName + '" template');
                 }
 
-                const template = AFRAME.templates[templateName];
-                var clone = document.importNode(template.content, true);
-                this.attachNodes(clone.children);
+                const aTemplate = AFRAME.templates[templateName];
+                var clone = document.importNode(aTemplate.template.content, true);
+                this.attachNodes([].slice.call(clone.children), 'templateId');
+
+                this.isAttached = true;
+            }
+        },
+
+        getNodes: {
+            value: function() {
+                var templateName = this.id;
+
+                if (!templateName) {
+                    return false;
+                }
+
+                if (!AFRAME.templates[templateName]) {
+                    throw new Error('Cannot find "' + templateName + '" template');
+                }
+
+                const aTemplate = AFRAME.templates[templateName];
+                var clone = document.importNode(aTemplate.template.content, true);
+
+                this.isAttached = true;
+
+                return [].slice.call(clone.children);
             }
         }
     }, commonPrototype))
