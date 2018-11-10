@@ -28,25 +28,26 @@ Example:
 
 ##### Register one    
 
-    AFRAME.registerTemplate('frame1', `  
-            <a-sub-assets>
-                <img id="pug" src="../assets/pug.jpg">
-                <a-asset-item id="horse-mtl" src="assets/monkey.js"></a-asset-item>
-            </a-sub-assets>
-    
-            <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
-            <a-box position="-1 0.5 -1" rotation="0 45 0" color="#ccaavv"></a-box>
-    
-            <a-sky id="sky" src="#pug"></a-sky>
-    `);
+    AFRAME.registerTemplate('frame1', ({type})=> 
+    `  
+                <a-sub-assets>
+                    <img id="pug" src="../assets/pug.jpg">
+                    <a-asset-item id="horse-mtl" src="assets/monkey.js"></a-asset-item>
+                </a-sub-assets>
+        
+                <a-box type="${type}" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+                <a-box position="-1 0.5 -1" rotation="0 45 0" color="#ccaavv"></a-box>
+        
+                <a-sky id="sky" src="#pug"></a-sky>
+        `);
     
 ##### Add on scene via component 
 
-    <a-template id="common"></a-template>
+    <a-template name="common" options="type: glass"></a-template>
     
 ##### Add on scene via a-route     
      
-    <a-route id="frame1" template="frame2"></a-route> 
+    <a-route id="frame1" template="frame2" options="type: glass"></a-route> 
     
 Note: All assets added via template will be loaded dinamically.
  

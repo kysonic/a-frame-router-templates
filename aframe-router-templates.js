@@ -2,22 +2,34 @@
 
 AFRAME.templates = {};
 
-function ATemplate(template) {
-    this.template = template;
+function ATemplate(HTML) {
+    this.HTML = HTML;
 }
 
-ATemplate.prototype.generateId = function() {
+ATemplate.prototype.generateId = function () {
     return '_' + Math.random().toString(36).substr(2, 9);
 };
+
+ATemplate.prototype.template = function (options) {
+    var template = document.createElement('template');
+
+    if (typeof this.HTML === 'string') {
+        template.innerHTML = this.HTML;
+    }
+    if (typeof this.HTML === 'function') {
+        template.innerHTML = this.HTML(options);
+    }
+    return template;
+}
 /**
  * Initialize directly via JS
  * @param id - id of new element added on Scene
  * @returns {Node}
  */
-ATemplate.prototype.init = function(id) {
-    var clone = document.importNode(this.template.content, true);
+ATemplate.prototype.init = function (id, options) {
+    var clone = document.importNode(this.template(options).content, true);
     this.scene = document.querySelector('a-scene');
-    if(!this.scene) {
+    if (!this.scene) {
         throw new Error('Scene is not found');
     }
     clone.id = id || this.generateId();
@@ -26,18 +38,15 @@ ATemplate.prototype.init = function(id) {
     return clone;
 };
 
-AFRAME.registerTemplate = function(name, HTML) {
-    if(!name) {
+AFRAME.registerTemplate = function (name, HTML) {
+    if (!name) {
         throw new Error('Name of template cannot be empty');
     }
-    if(AFRAME.templates[name]) {
-        throw new Error('Template "'+ name +'" already registered');
+    if (AFRAME.templates[name]) {
+        throw new Error('Template "' + name + '" already registered');
     }
 
-    var template = document.createElement('template');
-    template.innerHTML = HTML;
-
-    AFRAME.templates[name] = new ATemplate(template);
+    AFRAME.templates[name] = new ATemplate(HTML);
 };
 
 AFRAME.registerSystem('router', {
@@ -84,27 +93,22 @@ AFRAME.registerSystem('router', {
             return false;
         }
         if (!this.data.routes[routeId]) {
-            throw new Error('Route with following id: ' + route.id + ' is not registred.');
+            throw new Error('Route with following id: ' + routeId + ' is not registred.');
         }
         this.data.previous = this.data.current;
         this.data.routes[this.data.previous].detach();
 
         this.data.current = routeId;
         this.data.routes[this.data.current].attach();
+
+        this.el.emit('route-changed', routeId);
     }
 });
 
 var commonPrototype = {
     closestScene: {
         value: function closest() {
-            var element = this;
-            while (element) {
-                if (element.isScene) {
-                    break;
-                }
-                element = element.parentElement;
-            }
-            return element;
+            return document.querySelector('a-scene');
         }
     },
 
@@ -135,6 +139,23 @@ var commonPrototype = {
                 childClone.dataset[idName] = self.id;
                 self.scene.appendChild(childClone);
             });
+        }
+    },
+
+    getTemplateOptions: {
+        value: function () {
+            var optionsString = this.getAttribute('options');
+            if (!optionsString) {
+                return {};
+            }
+            var options = {};
+            var optionsArray = optionsString.split(';');
+            optionsArray.forEach(function (item) {
+                var itemSplit = item.split(':');
+                options[itemSplit[0].trim()] = itemSplit[1].trim();
+            });
+
+            return options;
         }
     }
 }
@@ -176,16 +197,17 @@ AFRAME.registerElement('a-route', {
                     return false;
                 }
 
-                if(!AFRAME.templates) {
+                if (!AFRAME.templates) {
                     throw new Error('Include aframe-templates.js');
                 }
 
                 if (!AFRAME.templates[templateName]) {
                     throw new Error('Cannot find "' + this.data.name + '" template');
                 }
+                this.options = this.getTemplateOptions();
 
                 this.aTemplate = AFRAME.templates[templateName];
-                var clone = document.importNode(this.aTemplate.template.content, true);
+                var clone = document.importNode(this.aTemplate.template(this.options).content, true);
                 this.attachNodes([].slice.call(clone.children), 'routeId');
             }
         },
@@ -257,7 +279,7 @@ AFRAME.registerElement('a-template', Object.assign({
 
         attach: {
             value: function () {
-                var templateName = this.id;
+                var templateName = this.getAttribute('name');
 
                 if (!templateName) {
                     return false;
@@ -267,8 +289,10 @@ AFRAME.registerElement('a-template', Object.assign({
                     throw new Error('Cannot find "' + templateName + '" template');
                 }
 
+                this.options = this.getTemplateOptions();
+
                 const aTemplate = AFRAME.templates[templateName];
-                var clone = document.importNode(aTemplate.template.content, true);
+                var clone = document.importNode(aTemplate.template(this.options).content, true);
                 this.attachNodes([].slice.call(clone.children), 'templateId');
 
                 this.isAttached = true;
@@ -276,8 +300,8 @@ AFRAME.registerElement('a-template', Object.assign({
         },
 
         getNodes: {
-            value: function() {
-                var templateName = this.id;
+            value: function () {
+                var templateName = this.getAttribute('name');
 
                 if (!templateName) {
                     return false;
@@ -287,8 +311,10 @@ AFRAME.registerElement('a-template', Object.assign({
                     throw new Error('Cannot find "' + templateName + '" template');
                 }
 
-                const aTemplate = AFRAME.templates[templateName];
-                var clone = document.importNode(aTemplate.template.content, true);
+                this.options = this.getTemplateOptions();
+
+                var aTemplate = AFRAME.templates[templateName];
+                var clone = document.importNode(aTemplate.template(this.options).content, true);
 
                 this.isAttached = true;
 
