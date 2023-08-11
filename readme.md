@@ -1,6 +1,7 @@
 # A-FRAME ROUTER AND TEMPLATES
 
 Example:  
+
     <script src="https://cdn.jsdelivr.net/gh/kysonic/a-frame-router-templates@0.0.2/dist/assets/index.js"></script>
     
     <a-scene id="scene" router>
