@@ -1,7 +1,8 @@
 # A-FRAME ROUTER AND TEMPLATES
 
 Example:  
-
+    <script src="https://cdn.jsdelivr.net/gh/kysonic/a-frame-router-templates@0.0.2/dist/assets/index.js"></script>
+    
     <a-scene id="scene" router>
         <a-route id="frame1">
             <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
@@ -17,8 +18,7 @@ Example:
     
         <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
         <a-sky color="#ECECEC"></a-sky>
-    </a-scene>
-    
+    </a-scene>    
 #### Change route 
 
     var router = document.getElementById('scene').systems['router'];
@@ -49,7 +49,7 @@ Example:
      
     <a-route id="frame1" template="frame2" options="type: glass"></a-route> 
     
-Note: All assets added via template will be loaded dinamically.
+Note: All assets added via template will be loaded dynamically.
  
 Note2: Construction like: 
 
