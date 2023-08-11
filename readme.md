@@ -49,6 +49,10 @@ Example:
 ##### Add on scene via a-route     
      
     <a-route id="frame1" template="frame2" options="type: glass"></a-route> 
+
+##### Add on scene via code    
+     
+    AFRAME.templates['frame1'].instance({ type: 'new'});
     
 Note: All assets added via template will be loaded dynamically.
  
