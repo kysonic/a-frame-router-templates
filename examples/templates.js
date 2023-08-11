@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 AFRAME.registerTemplate('frame1', `  
         <a-sub-assets>
             <img id="pug" src="/assets/pug.jpg">
@@ -19,9 +17,11 @@ AFRAME.registerTemplate('frame3', `
     <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
 `);
 
+AFRAME.registerTemplate('box', ({ position }) => `<a-box color="#CCAA00" position="${position}"></a-box>`);
+
 AFRAME.registerTemplate('common', `
     <a-sub-assets>
         <img id="cat" src="/assets/cat.jpg">
     </a-sub-assets>
-    <a-cylinder position="0 0.5 -3" radius="0.5" height="0,5" color="red"></a-cylinder>
+    <a-cylinder position="0 1 -3" radius="0.5" height="2" color="red"></a-cylinder>
 `);
