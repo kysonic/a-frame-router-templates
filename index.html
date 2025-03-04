@@ -3,8 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script type="module" src="src/index.js"></script>
     <title>A-Frame Router-Templates</title>
+  </head>
   <body>
+    <a-scene id="scene" router>
+      <a-route id="frame1" template="frame1"></a-route>
+
+      <a-route id="frame2" template="frame2"></a-route>
+
+      <a-route id="frame3" template="frame3"></a-route>
+
+      <a-template name="common"></a-template>
+
+      <a-plane
+        position="0 0 -4"
+        rotation="-90 0 0"
+        width="4"
+        height="4"
+        color="#7BC8A4"
+      ></a-plane>
+    </a-scene>
+    <button
+      style="position: absolute; top: 10px"
+      onclick="changeRoute('frame1')"
+    >
+      Frame1
+    </button>
+    <button
+      style="position: absolute; top: 10px; left: 80px"
+      onclick="changeRoute('frame2')"
+    >
+      Frame2
+    </button>
+    <button
+      style="position: absolute; top: 10px; left: 160px"
+      onclick="changeRoute('frame3')"
+    >
+      Frame3
+    </button>
+    <button
+      style="position: absolute; top: 10px; left: 240px"
+      onclick="instance()"
+    >
+      Instance
+    </button>
+    <script type="module" src="./src/index.js"></script>
   </body>
 </html>

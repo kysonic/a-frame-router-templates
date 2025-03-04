@@ -49,27 +49,8 @@ class ARouterTemplateNode extends AFRAME.ANode {
     this.isAttached = false;
   }
 
-  onReadyStateChange() {
-    if (document.readyState === 'complete') {
-      this.doConnectedCallback();
-    }
-  }
-
-  connectedCallback() {
-    // Defer if DOM is not ready.
-    if (document.readyState !== 'complete') {
-      document.addEventListener(
-        'readystatechange',
-        this.onReadyStateChange.bind(this),
-      );
-      return;
-    }
-
-    AEntity.prototype.doConnectedCallback.call(this);
-  }
-
   doConnectedCallback() {
-    super.connectedCallback();
+    super.doConnectedCallback();
     this.attach();
   }
 
@@ -215,6 +196,7 @@ class ASubAssets extends ARouterTemplateNode {
 }
 
 customElements.define('a-sub-assets', ASubAssets);
+
 
 AFRAME.registerSystem('router', {
   schema: {

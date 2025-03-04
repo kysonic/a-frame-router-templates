@@ -3,22 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/kysonic/a-frame-router-templates@0.0.2/dist/assets/index.js"></script>
     <script src="./templates.js"></script>
     <title>A-Frame Router-Templates</title>
     <script>
-      window.onload = function () {
-        var router = document.getElementById('scene').systems['router'];
+      document.addEventListener('aframeready', () => {
+        const router = document.getElementById('scene').systems['router'];
 
         window.changeRoute = function changeRoute(routeId) {
           router.changeRoute(routeId);
         };
 
         window.instance = function instance() {
-          AFRAME.templates['box'].instance({ position: `0 2 -${Math.floor(Math.random() * 3)}`})
+          AFRAME.templates['box'].instance({
+            position: `0 2 -${Math.floor(Math.random() * 3)}`,
+          });
         };
-      };
+      });
     </script>
   </head>
   <body>

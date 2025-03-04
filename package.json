@@ -14,5 +14,8 @@
   },
   "devDependencies": {
     "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "aframe": "^1.7.0"
   }
 }
